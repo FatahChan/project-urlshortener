@@ -9,10 +9,7 @@ dotenv.config();
 
 const app = express();
 
-const options = {
-  family: 4,
-  hints: dns.ADDRCONFIG | dns.V4MAPPED,
-};
+
 // Mongodb
 main().catch(err => console.log(err));
 async function main() {
@@ -38,16 +35,6 @@ app.get('/', function(req, res) {
 });
 
 
-
-const _CreateShortUrl = async (url, hash) => {
-  let shorty = new ShortURL({url: url, short_url: hash})
-  await shorty.save((err, data) => {
-    if(err) console.log(err);
-  });
-}
-
-
-
 // Your first API endpoint
 app.get('/api/hello', function(req, res) {
   res.json({ greeting: 'hello API' });
@@ -59,7 +46,7 @@ app.post('/api/shorturl', (req, res) =>{
   }
   const url = new URL(req.body.url);
   const hostname = url.hostname;
-  dns.lookup(hostname, (err, address)=>{
+  dns.lookup(hostname, (err)=>{
     if(err){
       res.json({ error: 'invalid url' });
     }else{
@@ -71,7 +58,7 @@ app.post('/api/shorturl', (req, res) =>{
           res.json({ original_url : data.url, short_url : data.short_url})
         }else{
           const doc  = {url: req.body.url, short_url: cyrb53(req.body.url).toString(36)};
-          ShortURL.create(doc, (err, data) =>{
+          ShortURL.create(doc, (err) =>{
               if(err) console.log(err);
               res.json({ original_url : doc.url, short_url : doc.short_url})
             }
